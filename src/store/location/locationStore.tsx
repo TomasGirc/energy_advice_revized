@@ -37,7 +37,7 @@ export const useLocationStore = create<
     end_date: defaults.end_date,
   };
   // Initialize locationList from localStorage if present
-  let initialLocationList: Location[] = [];
+  let initialLocationList: (Location & { active?: boolean })[] = [];
   if (typeof window !== "undefined") {
     const stored = localStorage.getItem("locationList");
     if (stored) {
@@ -66,7 +66,11 @@ export const useLocationStore = create<
             l.longitude === location.longitude,
         )
       ) {
-        const updatedList = [...locationList, { ...location }];
+        // If this is the first location, set it active
+        const updatedList =
+          locationList.length === 0
+            ? [{ ...location, active: true }]
+            : [...locationList, { ...location, active: false }];
         set({ locationList: updatedList });
         if (typeof window !== "undefined") {
           localStorage.setItem("locationList", JSON.stringify(updatedList));
@@ -75,19 +79,35 @@ export const useLocationStore = create<
     },
     deleteLocation: () => {
       const { location, locationList } = get();
-      const filtered = locationList.filter(
+      let filtered = locationList.filter(
         (l) =>
           !(
             l.latitude === location.latitude &&
             l.longitude === location.longitude
           ),
       );
+      // If the deleted location was active, set the first as active
+      if (!filtered.some((l) => l.active) && filtered.length > 0) {
+        filtered = filtered.map((l, i) => ({ ...l, active: i === 0 }));
+      }
       set({
         locationList: filtered,
         location: { ...defaultLocation, hourly: location.hourly },
       });
       if (typeof window !== "undefined") {
         localStorage.setItem("locationList", JSON.stringify(filtered));
+      }
+    },
+
+    setActiveLocation: (latitude: number, longitude: number) => {
+      const { locationList } = get();
+      const updatedList = locationList.map((loc) => ({
+        ...loc,
+        active: loc.latitude === latitude && loc.longitude === longitude,
+      }));
+      set({ locationList: updatedList });
+      if (typeof window !== "undefined") {
+        localStorage.setItem("locationList", JSON.stringify(updatedList));
       }
     },
   };

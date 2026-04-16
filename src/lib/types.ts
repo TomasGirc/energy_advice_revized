@@ -5,6 +5,7 @@ export type Location = {
   timezone: string;
   start_date: string;
   end_date: string;
+  active?: boolean;
 };
 
 export type LocationStore = {
@@ -14,6 +15,9 @@ export type LocationStore = {
   addLocationToList: (loc: Location) => void;
   setStartDate: (start_date: string) => void;
   setEndDate: (end_date: string) => void;
+  saveLocation: () => void;
+  deleteLocation: () => void;
+  setActiveLocation: (latitude: number, longitude: number) => void;
 };
 
 export type ComputedSeries = string[];

@@ -50,6 +50,9 @@ const InteractiveMap = () => {
   const saveLocation = useLocationStore((state) => state.saveLocation);
   const deleteLocation = useLocationStore((state) => state.deleteLocation);
   const locationList = useLocationStore((state) => state.locationList);
+  const setActiveLocation = useLocationStore(
+    (state) => state.setActiveLocation,
+  );
   const [markerPosition, setMarkerPosition] = useState<[number, number]>([
     location.latitude,
     location.longitude,
@@ -95,6 +98,7 @@ const InteractiveMap = () => {
       start_date: loc.start_date,
       end_date: loc.end_date,
     });
+    setActiveLocation(loc.latitude, loc.longitude);
     const params = new URLSearchParams(window.location.search);
     params.set("lat", loc.latitude.toString());
     params.set("lng", loc.longitude.toString());
