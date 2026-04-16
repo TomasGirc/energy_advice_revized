@@ -30,6 +30,7 @@ import { useComputedSeriesStore } from "@/store/computedSeriesStore";
 import { fetchOpenMeteoData } from "@/hooks/openMeteo";
 import MultiLineChart from "./multiLineChart";
 import DateRangePicker from "../toolbar/datePicker";
+import { METRICS } from "@/lib/constants";
 
 type HourlyWeatherData = {
   time: string[];
@@ -88,14 +89,6 @@ const LocationDetailsView = () => {
       setUrlParams({ computed_series: undefined });
     }
   }, [computedSeriesStore]);
-
-  const METRICS = [
-    { key: "temperature_2m", label: "Temperature (°C)" },
-    { key: "relative_humidity_2m", label: "Relative Humidity (%)" },
-    { key: "apparent_temperature", label: "Apparent Temperature (°C)" },
-    { key: "rain", label: "Rain (mm)" },
-    { key: "snowfall", label: "Snowfall (cm)" },
-  ];
 
   // Guard: don't render chart if data is missing or no metrics selected
   const selectedMetrics =
