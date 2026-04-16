@@ -28,6 +28,7 @@ import { trendLine } from "@/lib/helpers/trendLine";
 import { useComputedSeriesStore } from "@/store/computedSeriesStore";
 import { fetchOpenMeteoData } from "@/hooks/openMeteo";
 import MultiLineChart from "./multiLineChart";
+import DateRangePicker from "../toolbar/datePicker";
 
 type HourlyWeatherData = {
   time: string[];
@@ -170,6 +171,7 @@ const LocationDetailsView = () => {
 
   return (
     <div>
+      <DateRangePicker />
       <div className="flex flex-col md:flex-row mb-2">
         <div className="mr-0 md:mr-4 mb-2 md:mb-0">
           <strong>Latitude:</strong> {location.latitude}
@@ -244,12 +246,14 @@ const LocationDetailsView = () => {
             }));
 
             return (
-              <MultiLineChart
-                key={metric.key}
-                labels={hourly!.time}
-                datasets={[metricDataset, ...computedDatasets]}
-                title={metric.label}
-              />
+              <>
+                <MultiLineChart
+                  key={metric.key}
+                  labels={hourly!.time}
+                  datasets={[metricDataset, ...computedDatasets]}
+                  title={metric.label}
+                />
+              </>
             );
           })}
         </div>
