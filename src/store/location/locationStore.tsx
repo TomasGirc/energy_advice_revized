@@ -36,9 +36,21 @@ export const useLocationStore = create<
     start_date: defaults.start_date,
     end_date: defaults.end_date,
   };
+  // Initialize locationList from localStorage if present
+  let initialLocationList: Location[] = [];
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("locationList");
+    if (stored) {
+      try {
+        initialLocationList = JSON.parse(stored);
+      } catch (e) {
+        initialLocationList = [];
+      }
+    }
+  }
   return {
     location: defaultLocation,
-    locationList: [],
+    locationList: initialLocationList,
     setLocation: (location: Location) => set({ location }),
     setStartDate: (start_date: string) =>
       set((state) => ({ location: { ...state.location, start_date } })),
@@ -54,7 +66,11 @@ export const useLocationStore = create<
             l.longitude === location.longitude,
         )
       ) {
-        set({ locationList: [...locationList, { ...location }] });
+        const updatedList = [...locationList, { ...location }];
+        set({ locationList: updatedList });
+        if (typeof window !== "undefined") {
+          localStorage.setItem("locationList", JSON.stringify(updatedList));
+        }
       }
     },
     deleteLocation: () => {
@@ -70,6 +86,9 @@ export const useLocationStore = create<
         locationList: filtered,
         location: { ...defaultLocation, hourly: location.hourly },
       });
+      if (typeof window !== "undefined") {
+        localStorage.setItem("locationList", JSON.stringify(filtered));
+      }
     },
   };
 });
