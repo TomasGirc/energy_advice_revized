@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocationStore } from "@/store/location/locationStore";
+import { setUrlParams } from "@/lib/helpers/urlParamsUpdate";
 
 const METRICS = [
   "temperature_2m",
@@ -27,17 +28,9 @@ const SelectionWeatherMetrics = () => {
   // Update store and URL when selected changes
   useEffect(() => {
     setLocation({ ...location, hourly: selected });
-    const params = new URLSearchParams(window.location.search);
-    if (selected.length > 0) {
-      params.set("hourly", selected.join(","));
-    } else {
-      params.delete("hourly");
-    }
-    window.history.replaceState(
-      {},
-      "",
-      `${window.location.pathname}?${params.toString()}`,
-    );
+    setUrlParams({
+      hourly: selected.length > 0 ? selected.join(",") : undefined,
+    });
     // eslint-disable-next-line
   }, [selected]);
 

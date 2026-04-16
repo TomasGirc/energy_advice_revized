@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.css";
 import { useLocationStore } from "@/store/location/locationStore";
+import { setUrlParams } from "@/lib/helpers/urlParamsUpdate";
 
 const DateRangePicker = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -41,14 +42,7 @@ const DateRangePicker = () => {
               setEndDate(end);
             }
             // Update URL params
-            const params = new URLSearchParams(window.location.search);
-            if (start) params.set("start_date", start);
-            if (end) params.set("end_date", end);
-            window.history.replaceState(
-              {},
-              "",
-              `${window.location.pathname}?${params.toString()}`,
-            );
+            setUrlParams({ start_date: start, end_date: end });
           }
         },
       });

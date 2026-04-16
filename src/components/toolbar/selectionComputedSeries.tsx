@@ -1,4 +1,9 @@
 import { useState, useEffect } from "react";
+import {
+  setUrlParams,
+  deleteUrlParams,
+  paramsURL,
+} from "@/lib/helpers/urlParamsUpdate";
 import { useComputedSeriesStore } from "@/store/computedSeriesStore";
 
 const SERIES = ["moving_average", "min_line", "max_line", "trend_line"];
@@ -11,7 +16,7 @@ const SelectionComputedSeries = () => {
   // Use lazy initialization to avoid setState in effect
   const [selected, setSelected] = useState<string[]>(() => {
     if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
+      const params = paramsURL;
       const urlSeries = params.get("computed_series");
       if (urlSeries) {
         return urlSeries.split(",").filter(Boolean);
@@ -23,17 +28,11 @@ const SelectionComputedSeries = () => {
   // Update store and URL when selected changes
   useEffect(() => {
     setComputedSeries(selected);
-    const params = new URLSearchParams(window.location.search);
     if (selected.length > 0) {
-      params.set("computed_series", selected.join(","));
+      setUrlParams({ computed_series: selected.join(",") });
     } else {
-      params.delete("computed_series");
+      deleteUrlParams(["computed_series"]);
     }
-    window.history.replaceState(
-      {},
-      "",
-      `${window.location.pathname}?${params.toString()}`,
-    );
     // eslint-disable-next-line
   }, [selected]);
 

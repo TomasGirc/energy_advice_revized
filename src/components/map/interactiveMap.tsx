@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { setUrlParams } from "@/lib/helpers/urlParamsUpdate";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import {
@@ -62,16 +63,12 @@ const InteractiveMap = () => {
     setMarkerPosition(pos);
     const newLoc = { ...location, latitude: pos[0], longitude: pos[1] };
     setLocation(newLoc);
-    const params = new URLSearchParams(window.location.search);
-    params.set("lat", pos[0].toString());
-    params.set("lng", pos[1].toString());
-    if (newLoc.start_date) params.set("start_date", newLoc.start_date);
-    if (newLoc.end_date) params.set("end_date", newLoc.end_date);
-    window.history.replaceState(
-      {},
-      "",
-      `${window.location.pathname}?${params.toString()}`,
-    );
+    setUrlParams({
+      lat: pos[0].toString(),
+      lng: pos[1].toString(),
+      start_date: newLoc.start_date,
+      end_date: newLoc.end_date,
+    });
   };
 
   const handleSaveLocation = () => {
@@ -99,16 +96,12 @@ const InteractiveMap = () => {
       end_date: loc.end_date,
     });
     setActiveLocation(loc.latitude, loc.longitude);
-    const params = new URLSearchParams(window.location.search);
-    params.set("lat", loc.latitude.toString());
-    params.set("lng", loc.longitude.toString());
-    if (loc.start_date) params.set("start_date", loc.start_date);
-    if (loc.end_date) params.set("end_date", loc.end_date);
-    window.history.replaceState(
-      {},
-      "",
-      `${window.location.pathname}?${params.toString()}`,
-    );
+    setUrlParams({
+      lat: loc.latitude.toString(),
+      lng: loc.longitude.toString(),
+      start_date: loc.start_date,
+      end_date: loc.end_date,
+    });
   }
 
   return (

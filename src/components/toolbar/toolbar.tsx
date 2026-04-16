@@ -3,6 +3,7 @@ import { useLocationStore } from "@/store/location/locationStore";
 import DateRangePicker from "./datePicker";
 import SelectionComputedSeries from "./selectionComputedSeries";
 import SelectionWeatherMetrics from "./selectionWeatherMetrics";
+import { paramsURL } from "@/lib/helpers/urlParamsUpdate";
 
 const Toolbar = () => {
   const location = useLocationStore((state) => state.location);
@@ -11,7 +12,7 @@ const Toolbar = () => {
   // Sync store with URL params after hydration
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
+    const params = paramsURL;
     const lat = params.get("lat");
     const lng = params.get("lng");
     const start = params.get("start_date");

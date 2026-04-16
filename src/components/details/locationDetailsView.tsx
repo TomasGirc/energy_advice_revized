@@ -1,3 +1,4 @@
+import { paramsURL, setUrlParams } from "@/lib/helpers/urlParamsUpdate";
 import { useEffect, useState } from "react";
 
 import {
@@ -73,7 +74,7 @@ const LocationDetailsView = () => {
   useEffect(() => {
     let urlSeries: string[] = [];
     if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
+      const params = paramsURL;
       const urlVal = params.get("computed_series");
       if (urlVal) urlSeries = urlVal.split(",").filter(Boolean);
     }
@@ -81,8 +82,10 @@ const LocationDetailsView = () => {
       setSelectedSeries(urlSeries);
     } else if (computedSeriesStore && computedSeriesStore.length > 0) {
       setSelectedSeries(computedSeriesStore);
+      setUrlParams({ computed_series: computedSeriesStore.join(",") });
     } else {
       setSelectedSeries([]);
+      setUrlParams({ computed_series: undefined });
     }
   }, [computedSeriesStore]);
 
