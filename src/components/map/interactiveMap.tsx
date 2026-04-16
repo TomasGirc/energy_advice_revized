@@ -41,6 +41,8 @@ function LocationMarker({
   );
 }
 
+const notyfSingleton = new Notyf();
+
 const InteractiveMap = () => {
   const location = useLocationStore((state) => state.location);
   const setLocation = useLocationStore((state) => state.setLocation);
@@ -51,7 +53,6 @@ const InteractiveMap = () => {
     location.latitude,
     location.longitude,
   ]);
-  const notyf = new Notyf();
 
   const handleSetPosition = (pos: [number, number]) => {
     setMarkerPosition(pos);
@@ -71,12 +72,12 @@ const InteractiveMap = () => {
 
   const handleSaveLocation = () => {
     saveLocation();
-    notyf.success("Location position saved!");
+    notyfSingleton.success("Location position saved!");
   };
 
   const handleDeleteLocation = () => {
     deleteLocation();
-    notyf.error("Location position deleted!");
+    notyfSingleton.error("Location position deleted!");
   };
 
   function updateMarkerPositionFromLocation(loc: {
