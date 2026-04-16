@@ -178,14 +178,81 @@ const LocationDetailsView = () => {
           <strong>Longitude:</strong> {location.longitude}
         </div>
       </div>
-      {loading && <div>Loading temperature data...</div>}
+      {loading && <div>Loading weather data...</div>}
       {error && <div style={{ color: "red" }}>{error}</div>}
       {availableMetrics.length > 0 ? (
-        <MultiLineChart
-          labels={hourly!.time}
-          datasets={lineDatasets}
-          title="Weather Metrics"
-        />
+        <div className="flex flex-col gap-6">
+          {availableMetrics.map((metric, idx) => {
+            // Prepare main metric dataset
+            const metricDataset = {
+              label: metric.label,
+              data: (hourly?.[metric.key] as number[]) ?? [],
+              borderColor: [
+                "#3b82f6",
+                "#f59e42",
+                "#22c55e",
+                "#ef4444",
+                "#6366f1",
+              ][idx % 5],
+              backgroundColor: "rgba(0,0,0,0)",
+              fill: false,
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0.3,
+            };
+
+            // Add computed series for this metric
+            const computedColors = {
+              moving_average: "#fbbf24",
+              min_line: "#10b981",
+              max_line: "#ef4444",
+              trend_line: "#6366f1",
+            };
+            const computedLabels = {
+              moving_average: "Moving Average",
+              min_line: "Min Value",
+              max_line: "Max Value",
+              trend_line: "Trend Line",
+            };
+            const computedDataFns = {
+              moving_average: (data: number[]) => movingAverage(data, 6),
+              min_line: minLine,
+              max_line: maxLine,
+              trend_line: trendLine,
+            };
+            const computedDatasets = selectedSeries.map((seriesKey, sIdx) => ({
+              label: `${metric.label} - ${computedLabels[seriesKey] || seriesKey}`,
+              data: Array.isArray(hourly?.[metric.key])
+                ? computedDataFns[seriesKey as keyof typeof computedDataFns](
+                    hourly?.[metric.key] as number[],
+                  )
+                : [],
+              borderColor:
+                computedColors[seriesKey as keyof typeof computedColors] ||
+                ["#888888", "#222222", "#cccccc", "#aaaaaa"][sIdx % 4],
+              backgroundColor: "rgba(0,0,0,0)",
+              fill: false,
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0.3,
+              borderDash:
+                seriesKey === "min_line" || seriesKey === "max_line"
+                  ? [8, 4]
+                  : seriesKey === "trend_line"
+                    ? [2, 2]
+                    : undefined,
+            }));
+
+            return (
+              <MultiLineChart
+                key={metric.key}
+                labels={hourly!.time}
+                datasets={[metricDataset, ...computedDatasets]}
+                title={metric.label}
+              />
+            );
+          })}
+        </div>
       ) : (
         <div>No metrics selected</div>
       )}
