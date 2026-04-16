@@ -35,7 +35,8 @@ function LocationMarker({
   return (
     <Marker position={position} icon={blackDotIcon}>
       <Popup>
-        Latitude: {position[0].toFixed(5)}, Longitude: {position[1].toFixed(5)}
+        Latitude: {position[0].toFixed(5)}, Longitude:{" "}
+        {position[1].toFixed(5)}{" "}
       </Popup>
     </Marker>
   );
@@ -83,18 +84,22 @@ const InteractiveMap = () => {
   function updateMarkerPositionFromLocation(loc: {
     latitude: number;
     longitude: number;
+    start_date: string;
+    end_date: string;
   }) {
     setMarkerPosition([loc.latitude, loc.longitude]);
     setLocation({
       ...location,
       latitude: loc.latitude,
       longitude: loc.longitude,
+      start_date: loc.start_date,
+      end_date: loc.end_date,
     });
     const params = new URLSearchParams(window.location.search);
     params.set("lat", loc.latitude.toString());
     params.set("lng", loc.longitude.toString());
-    if (location.start_date) params.set("start_date", location.start_date);
-    if (location.end_date) params.set("end_date", location.end_date);
+    if (loc.start_date) params.set("start_date", loc.start_date);
+    if (loc.end_date) params.set("end_date", loc.end_date);
     window.history.replaceState(
       {},
       "",
@@ -131,7 +136,19 @@ const InteractiveMap = () => {
           >
             <Popup>
               Latitude: {loc.latitude.toFixed(5)}, Longitude:{" "}
-              {loc.longitude.toFixed(5)}
+              {loc.longitude.toFixed(5)}{" "}
+              {loc.start_date && (
+                <>
+                  <br />
+                  Start: {loc.start_date}
+                </>
+              )}
+              {loc.end_date && (
+                <>
+                  <br />
+                  End: {loc.end_date}
+                </>
+              )}
             </Popup>
           </Marker>
         ))}
