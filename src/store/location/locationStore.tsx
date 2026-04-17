@@ -64,14 +64,16 @@ export const useLocationStore = create<LocationStore>((set, get) => {
       if (index !== -1) {
         // Update the existing location
         updatedList = locationList.map((l, i) =>
-          i === index ? { ...l, ...location } : l,
+          i === index
+            ? { ...l, ...location, active: true }
+            : { ...l, active: false },
         );
       } else {
         // Add new location
-        updatedList =
-          locationList.length === 0
-            ? [{ ...location, active: true }]
-            : [...locationList, { ...location, active: false }];
+        updatedList = [
+          ...locationList.map((l) => ({ ...l, active: false })),
+          { ...location, active: true },
+        ];
       }
       set({ locationList: updatedList });
       if (typeof window !== "undefined") {
