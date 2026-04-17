@@ -20,12 +20,21 @@ const blackDotIcon = L.divIcon({
   iconAnchor: [8, 8],
 });
 
+const greenDotIcon = L.divIcon({
+  className: "custom-green-dot",
+  html: '<div style="width:16px;height:16px;background:#16a34a;border-radius:50%;border:2px solid white;box-shadow:0 0 2px #000;transform:translate(-50%,-50%)"></div>',
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
 function LocationMarker({
   position,
   setPosition,
+  icon,
 }: {
   position: [number, number];
   setPosition: (pos: [number, number]) => void;
+  icon: L.DivIcon;
 }) {
   useMapEvents({
     click(e) {
@@ -34,7 +43,7 @@ function LocationMarker({
   });
 
   return (
-    <Marker position={position} icon={blackDotIcon}>
+    <Marker position={position} icon={icon}>
       <Popup>
         Latitude: {position[0].toFixed(5)}, Longitude:{" "}
         {position[1].toFixed(5)}{" "}
@@ -58,6 +67,11 @@ const InteractiveMap = () => {
     location.latitude,
     location.longitude,
   ]);
+  const hasSavedMarkerAtSelection = locationList.some(
+    (loc) =>
+      loc.latitude === markerPosition[0] && loc.longitude === markerPosition[1],
+  );
+  const isUnsavedSelection = !hasSavedMarkerAtSelection;
 
   const handleSetPosition = (pos: [number, number]) => {
     setMarkerPosition(pos);
@@ -118,13 +132,16 @@ const InteractiveMap = () => {
         <LocationMarker
           position={markerPosition}
           setPosition={handleSetPosition}
+          icon={isUnsavedSelection ? greenDotIcon : blackDotIcon}
         />
 
         {locationList.map((loc, idx) => (
           <Marker
             key={idx}
             position={[loc.latitude, loc.longitude]}
-            icon={blackDotIcon}
+            icon={
+              loc.active && !isUnsavedSelection ? greenDotIcon : blackDotIcon
+            }
             eventHandlers={{
               click: () => {
                 updateMarkerPositionFromLocation(loc);
