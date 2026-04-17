@@ -39,18 +39,34 @@ type HourlyWeatherData = {
 
 const LocationDetailsView = () => {
   const location = useLocationStore((state) => state.location);
+  const {
+    latitude,
+    longitude,
+    start_date,
+    end_date,
+    hourly: locationHourly,
+    timezone,
+  } = location;
   const [hourly, setHourly] = useState<HourlyWeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!location.latitude || !location.longitude) return;
+    if (!latitude || !longitude) return;
     let cancelled = false;
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchOpenMeteoData(location);
+        const fetchLocation = {
+          latitude,
+          longitude,
+          start_date,
+          end_date,
+          hourly: locationHourly,
+          timezone,
+        };
+        const data = await fetchOpenMeteoData(fetchLocation);
         if (!cancelled) setHourly(data.hourly);
       } catch (err: unknown) {
         if (!cancelled) {
@@ -65,7 +81,7 @@ const LocationDetailsView = () => {
     return () => {
       cancelled = true;
     };
-  }, [location]);
+  }, [latitude, longitude, start_date, end_date, locationHourly, timezone]);
 
   const [selectedSeries, setSelectedSeries] = useState<string[]>([]);
   const computedSeriesStore = useComputedSeriesStore(
