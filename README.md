@@ -62,7 +62,7 @@ only exist in localStorage
 - [-] All 3 computed series implemented: 7-day moving average, min and max lines, and simple trend/regression
 line
 - [-] Request cancellation or caching implemented for rapidly changing filters
-- [-] Unit tests added for transformation logic
+- [C] Unit tests added for transformation logic
 - [-] Dockerfile included
 - [-] docker-compose.yaml included
 - [-] docker-compose.yaml builds the application image from the provided Dockerfile
