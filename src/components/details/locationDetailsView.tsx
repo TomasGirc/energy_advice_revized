@@ -1,4 +1,3 @@
-import { paramsURL, setUrlParams } from "@/lib/helpers/urlParamsUpdate";
 import { useEffect, useState } from "react";
 
 import {
@@ -83,28 +82,9 @@ const LocationDetailsView = () => {
     };
   }, [latitude, longitude, start_date, end_date, locationHourly, timezone]);
 
-  const [selectedSeries, setSelectedSeries] = useState<string[]>([]);
-  const computedSeriesStore = useComputedSeriesStore(
+  const selectedSeries = useComputedSeriesStore(
     (state) => state.computedSeries,
   );
-
-  useEffect(() => {
-    let urlSeries: string[] = [];
-    if (typeof window !== "undefined") {
-      const params = paramsURL;
-      const urlVal = params.get("computed_series");
-      if (urlVal) urlSeries = urlVal.split(",").filter(Boolean);
-    }
-    if (urlSeries.length > 0) {
-      setSelectedSeries(urlSeries);
-    } else if (computedSeriesStore && computedSeriesStore.length > 0) {
-      setSelectedSeries(computedSeriesStore);
-      setUrlParams({ computed_series: computedSeriesStore.join(",") });
-    } else {
-      setSelectedSeries([]);
-      setUrlParams({ computed_series: undefined });
-    }
-  }, [computedSeriesStore]);
 
   // Guard: don't render chart if data is missing or no metrics selected
   const selectedMetrics =
@@ -119,67 +99,6 @@ const LocationDetailsView = () => {
       Array.isArray(hourly[m.key]) &&
       (hourly[m.key] as number[]).length > 0,
   );
-
-  // Prepare datasets for multi-line chart
-  let lineDatasets = availableMetrics.map((metric, idx) => ({
-    label: metric.label,
-    data: (hourly?.[metric.key] as number[]) ?? [],
-    borderColor: ["#3b82f6", "#f59e42", "#22c55e", "#ef4444", "#6366f1"][
-      idx % 5
-    ],
-    backgroundColor: "rgba(0,0,0,0)",
-    fill: false,
-    borderWidth: 2,
-    pointRadius: 0,
-    tension: 0.3,
-  }));
-
-  // Add computed series as additional lines for all selected metrics
-  if (availableMetrics.length > 0 && selectedSeries.length > 0) {
-    const computedColors: Record<string, string> = {
-      moving_average: "#fbbf24",
-      min_line: "#10b981",
-      max_line: "#ef4444",
-      trend_line: "#6366f1",
-    };
-    const computedLabels: Record<string, string> = {
-      moving_average: "Moving Average",
-      min_line: "Min Value",
-      max_line: "Max Value",
-      trend_line: "Trend Line",
-    };
-    const computedDataFns: Record<string, (data: number[]) => number[]> = {
-      moving_average: (data) => movingAverage(data, 6),
-      min_line: minLine,
-      max_line: maxLine,
-      trend_line: trendLine,
-    };
-    lineDatasets = [
-      ...lineDatasets,
-      ...availableMetrics.flatMap((metric) =>
-        selectedSeries.map((seriesKey, sIdx) => ({
-          label: `${metric.label} - ${computedLabels[seriesKey] || seriesKey}`,
-          data: Array.isArray(hourly?.[metric.key])
-            ? computedDataFns[seriesKey](hourly?.[metric.key] as number[])
-            : [],
-          borderColor:
-            computedColors[seriesKey] ||
-            ["#888888", "#222222", "#cccccc", "#aaaaaa"][sIdx % 4],
-          backgroundColor: "rgba(0,0,0,0)",
-          fill: false,
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: 0.3,
-          borderDash:
-            seriesKey === "min_line" || seriesKey === "max_line"
-              ? [8, 4]
-              : seriesKey === "trend_line"
-                ? [2, 2]
-                : undefined,
-        })),
-      ),
-    ];
-  }
 
   return (
     <div>
@@ -238,7 +157,7 @@ const LocationDetailsView = () => {
               trend_line: trendLine,
             };
             const computedDatasets = selectedSeries.map((seriesKey, sIdx) => ({
-              label: `${metric.label} - ${computedLabels[seriesKey] || seriesKey}`,
+              label: `${metric.label} - ${computedLabels[seriesKey as keyof typeof computedLabels] || seriesKey}`,
               data: Array.isArray(hourly?.[metric.key])
                 ? computedDataFns[seriesKey as keyof typeof computedDataFns](
                     hourly?.[metric.key] as number[],
