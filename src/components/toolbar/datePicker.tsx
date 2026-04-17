@@ -6,22 +6,36 @@ import { useLocationStore } from "@/store/location/locationStore";
 import { setUrlParams } from "@/lib/helpers/urlParamsUpdate";
 
 type DateRangePickerProps = {
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
 };
+
+const isIsoDate = (value?: string) =>
+  Boolean(value && /^\d{4}-\d{2}-\d{2}$/.test(value));
 
 const DateRangePicker = ({ startDate, endDate }: DateRangePickerProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const flatpickrRef = useRef<FlatpickrInstance | null>(null);
+  const hasUserInteractedRef = useRef(false);
   const { setStartDate, setEndDate, location, locationList, saveLocation } =
     useLocationStore();
-  const [dates, setDates] = useState(() => `${startDate} to ${endDate}`);
+  const [dates, setDates] = useState(() => {
+    const initialStart = startDate ?? location.start_date;
+    const initialEnd = endDate ?? location.end_date;
+    return `${initialStart} to ${initialEnd}`;
+  });
 
   // Update local state if active location changes
   // Extract active location for static dependency checking
   const activeLocation = locationList.find((loc) => loc.active) || location;
   const activeLat = activeLocation.latitude;
   const activeLng = activeLocation.longitude;
+  const [initialStartFromInput, initialEndFromInput] = dates.split(" to ");
+  const initialDefaultDate =
+    isIsoDate(initialStartFromInput) && isIsoDate(initialEndFromInput)
+      ? [initialStartFromInput, initialEndFromInput]
+      : [location.start_date, location.end_date];
+
   useEffect(() => {
     const newDates = `${activeLocation.start_date} to ${activeLocation.end_date}`;
     if (dates !== newDates) {
@@ -41,9 +55,10 @@ const DateRangePicker = ({ startDate, endDate }: DateRangePickerProps) => {
     if (inputRef.current) {
       flatpickrRef.current = flatpickr(inputRef.current, {
         mode: "range",
-        defaultDate: [location.start_date, location.end_date],
+        defaultDate: initialDefaultDate,
         closeOnSelect: false,
         onChange: (selectedDates: Date[], dateStr: string) => {
+          hasUserInteractedRef.current = true;
           setDates(dateStr.replace(", ", " to "));
           // Use local date to avoid off-by-one UTC bug
           const formatLocal = (d: Date) => {
@@ -84,6 +99,17 @@ const DateRangePicker = ({ startDate, endDate }: DateRangePickerProps) => {
     // Only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!flatpickrRef.current) return;
+    if (hasUserInteractedRef.current) return;
+    if (flatpickrRef.current.isOpen) return;
+
+    const [start, end] = dates.split(" to ");
+    if (isIsoDate(start) && isIsoDate(end)) {
+      flatpickrRef.current.setDate([start, end], false);
+    }
+  }, [dates]);
 
   return (
     <div className="max-w-md w-full flex flex-col">

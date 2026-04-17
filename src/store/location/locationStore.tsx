@@ -1,6 +1,6 @@
 import type { LocationStore, Location } from "@/lib/types";
 import { create } from "zustand";
-import { paramsURL, setUrlParams } from "@/lib/helpers/urlParamsUpdate";
+import { paramsURL } from "@/lib/helpers/urlParamsUpdate";
 
 function getDefaultDates() {
   const today = new Date();
